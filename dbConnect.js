@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const connect = () => {
   mongoose
-    .connect("mongodb://127.0.0.1:27017/portfolio")
+    .connect("mongodb+srv://root:root@cluster0.poouu8j.mongodb.net/")
     .then(() => {
       console.log("Connected to Database!");
     })
