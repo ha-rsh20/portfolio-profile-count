@@ -9,7 +9,10 @@ con.connect();
 
 app.use(
   cors({
-    origin: ["https://harsh-gajjar.netlify.app/"],
+    origin: [
+      "https://harsh-gajjar.netlify.app/",
+      "https://harsh-gajjar.netlify.app",
+    ],
   })
 );
 
