@@ -7,6 +7,8 @@ const app = express();
 
 con.connect();
 
+app.set("trust proxy", true);
+
 app.use(
   cors({
     origin: [

@@ -2,7 +2,13 @@ const view = require("../Schemas/viewCount");
 const expressAsyncHandler = require("express-async-handler");
 
 const addView = expressAsyncHandler(async (req, res) => {
-  const ip = req.ip;
+  const rawIp =
+    req.headers["x-forwarded-for"]?.split(",")[0] ||
+    req.socket?.remoteAddress ||
+    req.connection?.remoteAddress ||
+    req.ip;
+
+  const ip = rawIp.includes("::ffff:") ? rawIp.split("::ffff:")[1] : rawIp;
 
   let totalViewCount = [];
   //condition 1: updating total count
@@ -54,12 +60,14 @@ const addView = expressAsyncHandler(async (req, res) => {
     .findOne({ ip: ip })
     .then((data) => {
       ipViewCount = data;
+      console.log(data);
     })
     .catch((err) => {
       console.log(err);
     });
 
   if (!ipViewCount) {
+    console.log("Adding ip count!");
     let newIpViewCount = new view({
       id: ipViewCountAll[ipViewCountAll.length - 1].id + 1,
       ip: ip,
@@ -74,6 +82,7 @@ const addView = expressAsyncHandler(async (req, res) => {
         console.log(err);
       });
   } else {
+    console.log("Updating ip count!");
     await view
       .updateOne({ ip: ip }, { viewCount: ipViewCount.viewCount + 1 })
       .then(() => {
