@@ -2,6 +2,17 @@ const view = require("../Schemas/viewCount");
 const expressAsyncHandler = require("express-async-handler");
 
 const addView = expressAsyncHandler(async (req, res) => {
+  const date = new Date();
+  const formatted = new Intl.DateTimeFormat("en-GB", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZone: "Asia/Kolkata", // optional
+  }).format(date);
+
   const rawIp =
     req.headers["x-forwarded-for"]?.split(",")[0] ||
     req.socket?.remoteAddress ||
@@ -72,6 +83,8 @@ const addView = expressAsyncHandler(async (req, res) => {
       id: ipViewCountAll[ipViewCountAll.length - 1].id + 1,
       ip: ip,
       viewCount: 1,
+      timestamp: formatted,
+      latestTimestamp: formatted,
     });
     newIpViewCount
       .save()
@@ -83,8 +96,13 @@ const addView = expressAsyncHandler(async (req, res) => {
       });
   } else {
     console.log("Updating ip count!");
+    let updatedViewCount = {
+      viewCount: ipViewCount.viewCount + 1,
+      latestTimestamp: formatted,
+    };
+    !ipViewCount.timestamp ? (updatedViewCount.timestamp = formatted) : "";
     await view
-      .updateOne({ ip: ip }, { viewCount: ipViewCount.viewCount + 1 })
+      .updateOne({ ip: ip }, updatedViewCount)
       .then(() => {
         console.log("Ip: New count!");
       })
